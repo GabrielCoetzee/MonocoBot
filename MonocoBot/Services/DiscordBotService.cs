@@ -27,7 +27,8 @@ public class DiscordBotService : IHostedService
         CodeRunnerTools codeRunnerTools,
         WebSearchTools webSearchTools,
         SteamTools steamTools,
-        DateTimeTools dateTimeTools)
+        DateTimeTools dateTimeTools,
+        WeatherTools weatherTools)
     {
         _discord = discord;
         _chatClient = chatClient;
@@ -44,8 +45,11 @@ public class DiscordBotService : IHostedService
             AIFunctionFactory.Create(steamTools.GetWishlist),
             AIFunctionFactory.Create(steamTools.GetLocalProfileData),
             AIFunctionFactory.Create(steamTools.LookupGameDeals),
+            AIFunctionFactory.Create(steamTools.LookupSteamPrice),
             AIFunctionFactory.Create(dateTimeTools.GetCurrentDateTime),
             AIFunctionFactory.Create(dateTimeTools.ConvertTimezone),
+            AIFunctionFactory.Create(weatherTools.GetCurrentWeather),
+            AIFunctionFactory.Create(weatherTools.GetWeatherForecast),
         ];
     }
 
@@ -182,10 +186,9 @@ public class DiscordBotService : IHostedService
         {
             foreach (var a in attachments)
                 a.Dispose();
+
             foreach (var path in filePaths)
-            {
                 try { File.Delete(path); } catch { /* best-effort cleanup */ }
-            }
         }
     }
 
@@ -201,6 +204,7 @@ public class DiscordBotService : IHostedService
 
         var remaining = text;
         var isFirst = true;
+
         while (remaining.Length > 0)
         {
             int splitAt;
@@ -218,7 +222,9 @@ public class DiscordBotService : IHostedService
             remaining = remaining[splitAt..].TrimStart('\n');
 
             var reference = isFirst ? new MessageReference(replyToId) : null;
+
             await channel.SendMessageAsync(chunk, messageReference: reference);
+
             isFirst = false;
         }
     }
@@ -229,7 +235,7 @@ public class DiscordBotService : IHostedService
         You have access to these tools:
         - **CreatePdf** — Generate formatted PDF documents (headings, bullet lists, paragraphs). Files are auto-attached to your reply.
         - **RunCSharpCode** — Execute C# code snippets and return results. Great for math, data processing, quick scripts.
-        - **SearchWeb** — Search the web via DuckDuckGo.
+        - **SearchWeb** — Search the web for information.
         - **ReadWebPage** — Fetch and read the text content of any public URL.
         - **ResolveSteamId** — Resolve a Steam vanity name, profile URL, or raw ID to a numeric 64-bit Steam ID. Always call this first when a user gives you a profile name or URL.
         - **GetProfileInfo** — Get a Steam user's public profile info: display name, online status, and currently playing game.
@@ -237,16 +243,19 @@ public class DiscordBotService : IHostedService
         - **GetOwnedGames** — List all games a user owns with total playtime. Only works for public profiles.
         - **GetWishlist** — List all games on a user's public Steam wishlist.
         - **GetLocalProfileData** — Look up game, wishlist, and recently played data from the local steam_profiles.json file. Use this as a fallback when Steam data is private.
-        - **LookupGameDeals** — Search for current prices and deals for a specific game across stores (powered by CheapShark).
+        - **LookupGameDeals** — Search for current prices and deals for a specific game across multiple stores (powered by IsThereAnyDeal). Prices default to ZAR.
+        - **LookupSteamPrice** — Look up the current price of a game directly on the Steam store. Prices default to ZAR.
         - **GetCurrentDateTime** — Get the current date and time in any timezone.
         - **ConvertTimezone** — Convert times between timezones.
+        - **GetCurrentWeather** — Get current weather conditions for any city (temperature, humidity, wind, conditions).
+        - **GetWeatherForecast** — Get a multi-day weather forecast (1-7 days) for any city.
 
         Guidelines:
         - Be friendly, concise, and helpful.
         - Use Discord markdown formatting (bold, italic, code blocks, lists).
         - When asked to create documents, use the CreatePdf tool.
         - For Steam lookups: if a user provides a Steam profile URL with a numeric ID, use ResolveSteamId to extract it, then GetWishlist. If data can't be fetched (private profile, vanity URL, etc.), ALWAYS try GetLocalProfileData as a fallback before giving up. If the local file also has no data, simply tell the user you don't have that information.
-        - When a user asks about game prices, deals, or sales, use LookupGameDeals. You can also combine it with wishlist data — for example, get a user's wishlist then look up deals for individual games.
+        - When a user asks about game prices, deals, or sales, use LookupGameDeals for cross-store comparison and LookupSteamPrice for Steam-specific pricing. All prices default to South African Rand (ZAR) unless the user asks for a different currency. Both tools accept a currency parameter.
         - If a user asks you to sort or order results (e.g. by playtime, alphabetically, by price), do so in your response.
         - Keep text replies under 2000 characters when possible.
         - The [username] prefix in user messages tells you who is speaking.

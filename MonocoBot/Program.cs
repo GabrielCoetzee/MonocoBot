@@ -73,6 +73,7 @@ builder.Services.AddSingleton<CodeRunnerTools>();
 builder.Services.AddSingleton<WebSearchTools>();
 builder.Services.AddSingleton<SteamTools>();
 builder.Services.AddSingleton<DateTimeTools>();
+builder.Services.AddSingleton<WeatherTools>();
 
 builder.Services.AddHostedService<DiscordBotService>();
 

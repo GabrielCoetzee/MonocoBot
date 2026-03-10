@@ -10,4 +10,5 @@ public class BotOptions
     public string AiEndpoint { get; set; } = "";
     public int HealthPort { get; set; } = 8080;
     public int MaxConversationHistory { get; set; } = 50;
+    public string IsThereAnyDealApiKey { get; set; } = "";
 }
