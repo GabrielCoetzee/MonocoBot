@@ -4,7 +4,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using MonocoBot.Configuration;
@@ -12,8 +11,12 @@ using MonocoBot.Services;
 using MonocoBot.Tools;
 using OpenAI;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
+
+var botSection = builder.Configuration.GetSection("Bot");
+var healthPort = botSection.GetValue<int?>("HealthPort") ?? 8080;
+builder.WebHost.UseUrls($"http://*:{healthPort}");
 
 builder.Services.Configure<BotOptions>(builder.Configuration.GetSection("Bot"));
 
@@ -74,4 +77,7 @@ builder.Services.AddSingleton<DateTimeTools>();
 builder.Services.AddHostedService<DiscordBotService>();
 
 var app = builder.Build();
+
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 await app.RunAsync();

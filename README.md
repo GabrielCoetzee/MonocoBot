@@ -41,6 +41,7 @@ The bot reads settings from `appsettings.json` and supports [.NET User Secrets](
     "AiModel": "gpt-4o-mini",
     "AiApiKey": "",
     "AiEndpoint": "",
+    "HealthPort": 8080,
     "MaxConversationHistory": 50
   }
 }
@@ -54,6 +55,7 @@ The bot reads settings from `appsettings.json` and supports [.NET User Secrets](
 | `AiModel` | The model/deployment name (e.g., `gpt-4o-mini`). |
 | `AiApiKey` | API key for OpenAI or Azure OpenAI. Not needed for Ollama. |
 | `AiEndpoint` | Required for Azure and Ollama (e.g., `http://localhost:11434/v1`). |
+| `HealthPort` | Port for the `/health` endpoint (default: `8080`). |
 | `MaxConversationHistory` | Max messages retained per channel (default: `50`). |
 
 ### Using User Secrets (recommended for development)
