@@ -1,4 +1,4 @@
-# Monoco - Discord - Bot 🤖
+# Monoco - Discord - AI Bot 🤖
 
 ![Monoco](https://github.com/user-attachments/assets/d1ae75c0-9276-4257-bb01-742450f43f2d)
 
