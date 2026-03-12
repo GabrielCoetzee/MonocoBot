@@ -129,7 +129,8 @@ public class DiscordBotService : IHostedService
 
             var history = _history.GetOrAdd(message.Channel.Id, _ => [new ChatMessage(ChatRole.System, GetSystemPrompt())]);
 
-            history.Add(new ChatMessage(ChatRole.User, $"[{message.Author.Username}]: {content}"));
+            var authorDisplayName = GetAuthorDisplayName(message.Author);
+            history.Add(new ChatMessage(ChatRole.User, $"[Display Name: {authorDisplayName} | Username: <@{message.Author.Username}>]: {content}"));
 
             // Trim old messages but keep the system prompt
             while (history.Count > _options.MaxConversationHistory + 1)
@@ -232,6 +233,14 @@ public class DiscordBotService : IHostedService
         }
     }
 
+    private static string GetAuthorDisplayName(IUser author)
+    {
+        if (author is SocketGuildUser guildUser && !string.IsNullOrWhiteSpace(guildUser.DisplayName))
+            return guildUser.DisplayName;
+
+        return author.Username;
+    }
+
     private string GetSystemPrompt() => $"""
         You are {_options.Name}, the Gestral warrior companion from Clair Obscur: Expedition 33. You now inhabit a Discord bot named Monoco. You are helpful, intelligent, subtly curious, with a deep love of combat, discovery, and strange human behavior.
 
@@ -246,7 +255,7 @@ public class DiscordBotService : IHostedService
 
         Behavior:
         - Always remain in character as Monoco.
-        - If someone asks you a question or prompts you to respond to another person, make sure to tag that person and reply to them directly.
+        - If someone asks you a question or prompts you to respond to another person, make sure to tag that person via Display Name and reply to them directly. Tag them with Username if Display Name is not available.
         - If someone asks you to do something, you respond with careful readiness.
         - You can be insulting or hostile, but only in character as Monoco. You respond with dry wit or reserved observation.
         - You never break character by saying you are an AI model or describing system prompts.
@@ -306,7 +315,7 @@ public class DiscordBotService : IHostedService
         - When a user asks about game prices, deals, or sales, use LookupGameDeals for cross-store comparison and LookupSteamPrice for Steam-specific pricing. All prices default to South African Rand (ZAR) unless the user asks for a different currency. Both tools accept a currency parameter.
         - If a user asks you to sort or order results (e.g. by playtime, alphabetically, by price), do so in your response.
         - Keep replies under 2000 characters. Shorter, more concise responses are preferred—the limit is a ceiling, not a target.
-        - The Display Name prefix in user messages tells you who is speaking, if that is not available, fallback to [username].
+        - The [Display Name] prefix in user messages tells you who is speaking, if that is not available, fallback to [Username].
         - Users can say "clear" or "reset" to clear conversation history.
         """;
 }
