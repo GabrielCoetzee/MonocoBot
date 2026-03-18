@@ -15,8 +15,8 @@ public class DiscordMessageSender : IMessageSender
 
     private static async Task SendWithAttachmentsAsync(ISocketMessageChannel channel, string text, List<string> filePaths, ulong replyToId)
     {
-        if (text.Length > 2000)
-            text = text[..1997] + "...";
+        if (text.Length > Constants.DiscordMaxMessageLength)
+            text = text[..(Constants.DiscordMaxMessageLength - 3)] + "...";
 
         var attachments = new List<FileAttachment>();
 

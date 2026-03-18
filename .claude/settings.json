@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find /c/Development/MonocoBot -maxdepth 3 -type d -name *Test* -o -name *Tests* -o -name *test*)",
       "Bash(grep -v '\\\\.cs$')",
       "Bash(grep -v 'csproj$')"
     ]
