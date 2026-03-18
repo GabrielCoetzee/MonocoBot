@@ -2,7 +2,7 @@ namespace MonocoBot.Services;
 
 public static class MessageSplitter
 {
-    public static List<string> Split(string text, int maxLength = 2000)
+    public static List<string> Split(string text, int maxLength = Constants.DiscordMaxMessageLength)
     {
         if (string.IsNullOrEmpty(text))
             return [];
